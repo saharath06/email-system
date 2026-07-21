@@ -1,7 +1,4 @@
 cat << 'EOF' > ~/email-system/nixpacks.toml
-[phases.setup]
-nixPkgs = ["php82", "php82Extensions.pdo_mysql", "php82Extensions.mysqli", "php82Extensions.curl", "php82Extensions.mbstring", "php82Extensions.tokenizer", "php82Extensions.xml"]
-
 [start]
-cmd = "php -S 0.0.0.0:$PORT -t ."
+cmd = "php8.2 -S 0.0.0.0:$PORT -t ."
 EOF
