@@ -8,10 +8,12 @@ $db   = new Database();
 $conn = $db->getConnection();
 
 // جلب Bot Token
-$stmt = $conn->query("SELECT telegram_bot_token, auto_send FROM admins LIMIT 1");
+$stmt = $conn->query(
+    "SELECT telegram_bot_token, auto_send FROM admins LIMIT 1"
+);
 $admin_data = $stmt->fetch(PDO::FETCH_ASSOC);
-$bot_token = $admin_data['telegram_bot_token'] ?? '';
-$auto_send = $admin_data['auto_send'] ?? 1;
+$bot_token  = $admin_data['telegram_bot_token'] ?? '';
+$auto_send  = $admin_data['auto_send'] ?? 1;
 
 if (empty($bot_token)) {
     echo "no token";
@@ -35,18 +37,24 @@ $trades = $stmt->fetchAll(PDO::FETCH_ASSOC);
 foreach ($trades as $trade) {
     $stmt2 = $conn->prepare("
         SELECT telegram_chat_id FROM receivers 
-        WHERE admin_id = ? AND is_confirmed = 1 AND is_active = 1
+        WHERE admin_id = ? 
+        AND is_confirmed = 1 
+        AND is_active = 1
+        AND telegram_chat_id IS NOT NULL
     ");
     $stmt2->execute([$trade['admin_id']]);
     $receivers = $stmt2->fetchAll(PDO::FETCH_COLUMN);
 
     if (empty($receivers)) {
-        $conn->prepare("UPDATE trades SET status = 'failed' WHERE id = ?")->execute([$trade['id']]);
+        $conn->prepare(
+            "UPDATE trades SET status = 'failed' WHERE id = ?"
+        )->execute([$trade['id']]);
         continue;
     }
 
     $type_emoji = $trade['trade_type'] === 'BUY' ? '🟢' : '🔴';
-    $type_text  = $trade['trade_type'] === 'BUY' ? 'شراء (BUY)' : 'بيع (SELL)';
+    $type_text  = $trade['trade_type'] === 'BUY' 
+                  ? 'شراء (BUY)' : 'بيع (SELL)';
 
     $sl  = !empty($trade['stop_loss'])    ? $trade['stop_loss']    : '-';
     $tp1 = !empty($trade['take_profit1']) ? $trade['take_profit1'] : '-';
@@ -67,13 +75,13 @@ foreach ($trades as $trade) {
         "⏰ " . date('Y-m-d H:i') . "\n\n" .
         "📝 *ملاحظات:* {$notes}";
 
-    $success = false;
+    $success   = false;
     $sent_list = [];
 
     foreach ($receivers as $chat_id) {
         if (empty($chat_id)) continue;
 
-        $url = "https://api.telegram.org/bot{$bot_token}/sendMessage";
+        $url  = "https://api.telegram.org/bot{$bot_token}/sendMessage";
         $data = [
             'chat_id'    => $chat_id,
             'text'       => $message,
@@ -93,7 +101,7 @@ foreach ($trades as $trade) {
         curl_close($ch);
 
         if ($http_code === 200) {
-            $success = true;
+            $success     = true;
             $sent_list[] = $chat_id;
         }
     }
@@ -101,8 +109,9 @@ foreach ($trades as $trade) {
     $status  = $success ? 'sent' : 'failed';
     $sent_to = implode(', ', $sent_list);
 
-    $conn->prepare("UPDATE trades SET status = ?, sent_to = ? WHERE id = ?")
-         ->execute([$status, $sent_to, $trade['id']]);
+    $conn->prepare("
+        UPDATE trades SET status = ?, sent_to = ? WHERE id = ?
+    ")->execute([$status, $sent_to, $trade['id']]);
 }
 
 echo "done";

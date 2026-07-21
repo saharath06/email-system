@@ -1,11 +1,19 @@
 <?php
 class Database {
-    private $host     = 'sql104.infinityfree.com';
-    private $db_name  = 'if0_42456750_email_system';
-    private $username = 'if0_42456750';
-    private $password = '8k1wXAOIZkrES';
-    private $port     = '3306';
-    public  $conn;
+    private $host;
+    private $db_name;
+    private $username;
+    private $password;
+    private $port;
+    public $conn;
+
+    public function __construct() {
+        $this->host     = getenv('DB_HOST') ?: 'localhost';
+        $this->db_name  = getenv('DB_NAME') ?: 'email_system';
+        $this->username = getenv('DB_USER') ?: 'root';
+        $this->password = getenv('DB_PASS') ?: '';
+        $this->port     = getenv('DB_PORT') ?: '3306';
+    }
 
     public function getConnection() {
         $this->conn = null;
@@ -23,7 +31,7 @@ class Database {
                 PDO::ERRMODE_EXCEPTION
             );
         } catch(PDOException $e) {
-            die("خطأ في الاتصال: " . $e->getMessage());
+            die("خطأ: " . $e->getMessage());
         }
         return $this->conn;
     }
