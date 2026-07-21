@@ -1,2 +1,2 @@
 [deploy]
-startCommand = "apache2-foreground"
+startCommand = "php -S 0.0.0.0:$PORT -t /app"

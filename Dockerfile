@@ -1,9 +1,20 @@
-FROM php:8.2-apache
+FROM php:8.2-cli
 
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    curl \
+    && docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    mysqli \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY . /var/www/html/
+WORKDIR /app
 
-RUN chown -R www-data:www-data /var/www/html
+COPY . /app
 
-EXPOSE 80
+EXPOSE 8080
+
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "/app"]
