@@ -1,0 +1,5 @@
+cat > ~/email-system/railway.toml << 'TOML'
+[deploy]
+startCommand = "apache2-foreground"
+healthcheckPath = "/ping.php"
+TOML
