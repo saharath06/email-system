@@ -52,7 +52,7 @@ $unconfirmed = array_filter($receivers, function($r) { return $r['is_confirmed']
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة المستقبلين</title>
-    <link rel="stylesheet" href="/assets/style.css?v=1">
+    <?php include '../includes/load_style.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
