@@ -1,15 +1,15 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-cli
 
-RUN apk add --no-cache \
-    nginx \
-    curl \
-    && docker-php-ext-install pdo pdo_mysql mysqli
+RUN apt-get update && apt-get install -y \
+    libcurl4-openssl-dev \
+    && docker-php-ext-install pdo pdo_mysql mysqli curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY . /var/www/html/
-COPY nginx.conf /etc/nginx/nginx.conf
+WORKDIR /app
 
-RUN chown -R www-data:www-data /var/www/html
+COPY . /app
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080} -t /app"]
