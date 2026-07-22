@@ -1,20 +1,15 @@
-FROM php:8.2-cli
+FROM php:8.2-fpm-alpine
 
-RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
+RUN apk add --no-cache \
+    nginx \
     curl \
-    && docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    mysqli \
-    && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-install pdo pdo_mysql mysqli
 
-WORKDIR /app
+COPY . /var/www/html/
+COPY nginx.conf /etc/nginx/nginx.conf
 
-COPY . /app
+RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 8080
 
-CMD ["php", "-S", "0.0.0.0:8080", "-t", "/app"]
+CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
